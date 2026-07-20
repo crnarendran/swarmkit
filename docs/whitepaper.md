@@ -31,8 +31,9 @@ To overcome these limitations, SwarmKit enforces strict **Separation of Concerns
 - **SDET (Software Development Engineer in Test):** The automated testing specialist. Writes unit, integration, and end-to-end tests to ensure the Developer's code meets rigorous quality gates.
 
 #### 2.4 The Deployment & Evolution Layer
-- **Release Manager:** The DevOps specialist. Manages CI/CD pipelines, version control, and safe deployments to staging and production environments.
-- **Forger:** The meta-agent. Responsible for modifying the configurations, system prompts, and tools of the other agents to adapt the swarm to new challenges.
+- **Release Manager:** The DevOps specialist. Manages CI/CD pipelines, version control, and safe deployments to staging and production environments — and is responsible for watching every deployment through to a real terminal status, not just triggering it and moving on.
+- **Retro:** The process-improvement engine. Analyzes completed work for structural gaps in the framework and proposes concrete fixes — but requires explicit human approval before any change reaches the other agents' configurations.
+- **Forger:** The meta-agent. Applies approved configuration changes to adapt the swarm to new challenges, but only ever on an approved Retro handoff, never on its own initiative.
 
 #### 2.5 Shared Memory via Open Knowledge Format (OKF)
 A multi-agent system is only as good as its shared context. SwarmKit integrates the **Open Knowledge Format (OKF)** to provide a standardized, portable knowledge graph. By representing organizational knowledge, business logic, and system metadata as interconnected Markdown files with YAML frontmatter, OKF allows agents to independently navigate and retrieve exactly the context they need, when they need it, eliminating the "Context Saturation" problem.
@@ -44,6 +45,7 @@ A multi-agent system is only as good as its shared context. SwarmKit integrates 
 1. **Natural Quality Gates:** Code cannot reach production without passing through the Reviewer and the SDET. This prevents broken code from overwriting working systems.
 2. **Parallel Execution:** While the Developer writes the backend logic, the SDET can write the test assertions and the Docs agent can draft the API spec—drastically reducing time-to-delivery.
 3. **Domain Expertise:** Agents can be equipped with tools specific to their roles. The Reviewer gets static analysis tools, while the SDET gets access to a headless browser for E2E testing.
+4. **Autonomy Without Recklessness:** Non-stalling execution and human oversight are not actually in tension — the `human-escalation-policy` draws a narrow, explicit line around the decisions where a wrong guess is expensive or irreversible (credentials, billing, IAM, data location), and lets everything else proceed without a human in the loop. The Retro→Forger approval gate applies the same principle to the swarm modifying itself: propose freely, but never self-apply without a human checkpoint.
 
 ---
 

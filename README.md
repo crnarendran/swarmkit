@@ -16,9 +16,10 @@ Single-agent systems often struggle with context limits, scope creep, and a lack
 ## Core Framework Policies
 
 SwarmKit agents are bound by strict system constraints to ensure autonomy and velocity:
-1. **Non-Stalling Policy:** Agents will **never** block execution waiting for human input. If ambiguity arises, subagents document it and pass control back to the Architect, who acts as the single point of contact.
+1. **Escalation Policy:** Agents don't stall on ordinary ambiguity — they document an assumption and keep moving. But a specific, narrow set of decisions always goes to the human first, even if that means pausing: credentials and secrets, billing-affecting infrastructure changes, irreversible choices (a database region, a deleted resource), security/IAM grants, and reversals of a decision the human already made. See [`human-escalation-policy`](.agents/skills/human-escalation-policy/SKILL.md) — this is the rule most likely to bite silently if skipped, so it's a hard line, not a suggestion.
 2. **Asynchronous Execution:** Long-running commands (e.g., test suites) are launched as background tasks using native event-driven wakeups.
 3. **Points-Based Planning:** The Architect breaks down requirements into discrete features estimated by story points (e.g., 1, 2, 3, 5, 8) to ensure manageable iterations.
+4. **Retro Requires Approval:** The Retro agent proposes changes to the swarm's own `agent.json`/`SKILL.md` files, but the Forger may only apply them after the human explicitly approves — a self-modifying swarm without that checkpoint can drift its own operating rules silently.
 
 ---
 
@@ -28,16 +29,20 @@ SwarmKit strictly separates dynamic planning state from static project knowledge
 
 ```text
 c:/Naren/SwarmKit/
+├── AGENTS.md                   # Entry point — read this first, any tool
+├── CLAUDE.md                   # Imports AGENTS.md so Claude Code auto-loads it
 ├── .agents/                    
 │   ├── architect/              
 │   ├── developer/              
-│   └── skills/                 # SOPs (e.g., architect-planning-workflow)
+│   └── skills/                 # SOPs (e.g., architect-planning-workflow,
+│                                #   human-escalation-policy, e2e-testing-gotchas)
 ├── planning/                   # Dynamic project state
 │   ├── archive/                # Completed tasks and deprecated specs
 │   └── backlog/                # Points-based feature tickets
 ├── knowledge/                  # Static Open Knowledge Format (OKF) graph
 │   ├── adr/                    # Architecture Decision Records
-│   └── domain_model.md         
+│   ├── domain_model.md         
+│   └── infrastructure.md       # Environments, services, secret mapping, known gaps
 ├── docs/                       # Auto-generated project documentation
 ├── src/                        # Core application code
 ├── tests/                      # Automated test suites
@@ -46,6 +51,10 @@ c:/Naren/SwarmKit/
 ```
 
 Agents traverse this graph using standard Markdown links. For example, a ticket in `planning/backlog` will directly link to an `[ADR](file:///.../knowledge/adr/001-architecture.md)` explaining the design choices.
+
+If your agent tool auto-loads a different root file than `CLAUDE.md`, add
+a one-line import for it too — the goal is that `AGENTS.md` loads
+automatically no matter which tool opens this repo, not just one.
 
 ---
 
@@ -58,8 +67,9 @@ This repository comes pre-configured with the following roles in the `.agents` d
 3. 🛡️ **Reviewer**: Reviews code for best practices, security, and alignment with requirements.
 4. 📝 **Docs**: Maintains project documentation and enforces OKF YAML tags.
 5. 🧪 **SDET** (Software Development Engineer in Test): Writes automated tests and ensures high code coverage.
-6. 🚀 **Release Manager**: Orchestrates CI/CD pipelines, staging deployments, and production rollouts.
-7. 🔨 **Forger**: Modifies agent configurations and `.agents/skills` to evolve the swarm dynamically.
+6. 🚀 **Release Manager**: Orchestrates CI/CD pipelines, staging deployments, and production rollouts — and watches every deploy through to a real pass/fail, not just triggers it.
+7. 🔁 **Retro**: Analyzes what went wrong after a sprint and proposes concrete fixes to the swarm's own files — but requires human approval before anything is actually changed.
+8. 🔨 **Forger**: Applies approved changes to agent configurations and `.agents/skills` to evolve the swarm dynamically.
 
 ---
 
@@ -86,7 +96,7 @@ Here are a few ways you can use SwarmKit to bootstrap complex workflows:
 ## Quickstart 🚀
 
 1. **Use this template:** Click "Use this template" on GitHub.
-2. **Review the workflows:** Read `.agents/skills/` to understand the default SOPs.
+2. **Review the workflows:** Read `AGENTS.md` first, then `.agents/skills/` — especially `human-escalation-policy`, which every role depends on.
 3. **Deploy:** Point your agent framework to the `.agents` directory and let the Architect take the lead!
 
 ## License
