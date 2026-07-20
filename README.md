@@ -2,7 +2,7 @@
 
 > **A template repository for bootstrapping scalable agentic software development teams.**
 
-SwarmKit is an opinionated boilerplate for building multi-agent AI systems, inspired by the architecture used in `sanjeev-ai`. It provides the scaffolding necessary to set up a virtual software organization where specialized AI agents collaborate to plan, develop, test, and release software seamlessly.
+SwarmKit is an opinionated boilerplate for building multi-agent AI systems, inspired by the architecture used in `sanjeev-ai`. It provides the scaffolding necessary to set up a virtual software organization where specialized AI agents collaborate to plan, develop, test, and release software seamlessly. For a deeper dive into the architecture and theoretical framework, please read the [SwarmKit Whitepaper](docs/whitepaper.md).
 
 ## Why SwarmKit?
 
