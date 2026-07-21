@@ -1,0 +1,59 @@
+name: Sync Docs to Portal
+
+# Pushes this repo's own docs (README, AGENTS.md, docs/, knowledge/,
+# .agents/skills/*/SKILL.md) into the sanjeev-ai docs-portal's Firestore,
+# tagged project:'swarmkit', so they render at /swarmkit/... there without
+# the portal itself needing to redeploy.
+#
+# Requires a repo secret holding a Firebase service account JSON key with
+# Firestore write access to the target docs-portal-staging/prod project.
+# See knowledge/infrastructure.md for how to provision one — this workflow
+# does not create it for you.
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'README.md'
+      - 'AGENTS.md'
+      - 'docs/**'
+      - 'knowledge/**'
+      - '.agents/skills/**'
+      - 'scripts/syncDocs.ts'
+      - '.github/workflows/sync-docs.yml'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Which docs-portal project to sync to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - prod
+
+jobs:
+  sync-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install
+      - name: Sync docs
+        env:
+          FIREBASE_SERVICE_ACCOUNT_STAGING: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_STAGING }}
+          FIREBASE_SERVICE_ACCOUNT_PROD: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_PROD }}
+        run: |
+          TARGET="${{ github.event.inputs.target || 'staging' }}"
+          if [ "$TARGET" = "prod" ]; then
+            echo "$FIREBASE_SERVICE_ACCOUNT_PROD" > /tmp/sa.json
+            PROJECT_ID="docs-portal-prod"
+          else
+            echo "$FIREBASE_SERVICE_ACCOUNT_STAGING" > /tmp/sa.json
+            PROJECT_ID="docs-portal-staging"
+          fi
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json
+          npm run sync:docs -- --env=staging --project-id=$PROJECT_ID
