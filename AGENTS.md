@@ -54,23 +54,46 @@ To optimize code quality while minimizing token waste, subagents must be invoked
 Before launching **any** subagent or subprocess, pick the **lowest tier that can do the job**, and escalate only when the task genuinely needs it.
 - **`pro` / High:** Only for multi-file systemic reasoning, novel logic, security judgement, or architecture.
 - **`flash` / Medium:** The default for "transform what I already have" (docs, tests, refactors).
-- **`flash_lite` / Low:** Anything that *observes or relays* rather than reasons (background watchers, pollers, one-shot lookups).
+- **`flash_lite` / Low:** Anything that *observes or relays* rather than reasons — background watchers, pollers, log tailers, and one-shot lookups (does a file exist, what's the current branch, is a port open).
+
+**Never attach a `pro`/`flash` model to a long-lived background watcher.**
+It burns the expensive model idling on I/O. A subprocess whose whole job is
+"wait for a condition and report it" is always `flash_lite` — spawn it there,
+let it wake you on the event, then do the reasoning yourself on the tier the
+*next* step warrants. Spending `pro`-tier tokens on watch/poll/summarize work
+is the single most common source of waste in a swarm.
+
+**Fallback Escalation:**
+If a `flash` or `flash_lite` subagent repeatedly fails its task, terminate it,
+respawn it with the next higher tier, and trigger the Retro → Forger loop to
+update that task's SKILL file so its model tier is permanently escalated. The
+matrix is a floor-first default, not a ceiling — self-correct when a task
+proves it needs more.
 
 **Cross-tool tier mapping:**
 Whichever tool is running, map the tier to its own model family when spawning:
 - **Antigravity (Gemini):** `pro` → Gemini 3.1 Pro, `flash` → Gemini 3.6 Flash, `flash_lite` → Gemini 3.6 Flash-Lite.
 - **Claude Code (Claude):** `pro` → Opus, `flash` → Sonnet, `flash_lite` → Haiku.
 
-**SDK Guidance (Gemini 3.6+):**
-When writing or modifying code that uses Gemini 3.6 Flash (or newer models), you MUST use the `GoogleGenerativeAI` (AI Studio) SDK or the `@genkit-ai/googleai` plugin. Do NOT use the `VertexAI` SDK or `@genkit-ai/vertexai`, as it will result in `404 Not Found` region availability errors for these newer models.
+**SDK guidance is project-specific — do not treat vendor gotchas as swarm rules.**
+The matrix above is model-agnostic; concrete SDK choices are not, and belong in
+your own project's config/docs, not this portable rulebook. As a worked example
+(from the project this template was extracted from): a Gemini-based project may
+need to use the `GoogleGenerativeAI` (AI Studio) SDK / `@genkit-ai/googleai`
+plugin rather than `VertexAI` / `@genkit-ai/vertexai` for its newest models, to
+avoid `404 Not Found` region-availability errors. Record the equivalent gotcha
+for *your* stack where your project's code guidance lives — don't inherit this
+one blindly.
 
 ## Subagent Naming Convention
 
 When invoking any subagent, you MUST format the `Role` parameter to visibly indicate its type and the specific model version/tier (High/Medium/Low) for the user's awareness.
 Format: `[Descriptive Role] ([Agent|Sub-Process] - [Model Version] ([Tier]))`
-- Example 1 (pro): `Release Manager (Agent - Gemini 3.1 Pro (High))`
-- Example 2 (flash): `Docs Writer (Agent - Gemini 3.6 Flash (Medium))`
-- Example 3 (flash_lite): `GH Run Watcher (Sub-Process - Gemini 3.6 Flash-Lite (Low))`
+Use your runtime's own model names (see the cross-tool tier mapping above):
+- Example (pro, Gemini): `Release Manager (Agent - Gemini 3.1 Pro (High))`
+- Example (pro, Claude): `Reviewer (Agent - Opus (High))`
+- Example (flash): `Docs Writer (Agent - Gemini 3.6 Flash (Medium))`
+- Example (flash_lite): `GH Run Watcher (Sub-Process - Haiku (Low))`
 
 ## Portability: tool names in `agent.json` are placeholders
 

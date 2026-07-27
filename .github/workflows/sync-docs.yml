@@ -8,7 +8,13 @@ name: Sync Docs to Portal
 # Requires a repo secret holding a Firebase service account JSON key with
 # Firestore write access to the target docs-portal-staging/prod project.
 # See knowledge/infrastructure.md for how to provision one — this workflow
-# does not create it for you.
+# does not create it for you. Until the secret exists the job SKIPS (see the
+# `if:` guard below) rather than failing red on every push.
+#
+# PORTABILITY: this pipeline targets the sanjeev-ai docs-portal specifically
+# (the project this template was extracted from). If you cloned SwarmKit for
+# your own project, either delete this workflow or repoint it at your own
+# docs surface — it is not part of the portable swarm rulebook.
 
 on:
   push:
@@ -36,13 +42,23 @@ on:
 jobs:
   sync-docs:
     runs-on: ubuntu-latest
+    # `secrets` is not available in a job-level `if:`, so surface presence as a
+    # job-level env var (which CAN read secrets) and gate the steps on it. Until
+    # the secret is provisioned the steps skip and the job stays green, rather
+    # than failing red on every push. A manual run always proceeds.
+    env:
+      HAS_STAGING_SECRET: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_STAGING != '' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - if: ${{ env.HAS_STAGING_SECRET == 'true' || github.event_name == 'workflow_dispatch' }}
+        uses: actions/checkout@v4
+      - if: ${{ env.HAS_STAGING_SECRET == 'true' || github.event_name == 'workflow_dispatch' }}
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm install
+      - if: ${{ env.HAS_STAGING_SECRET == 'true' || github.event_name == 'workflow_dispatch' }}
+        run: npm install
       - name: Sync docs
+        if: ${{ env.HAS_STAGING_SECRET == 'true' || github.event_name == 'workflow_dispatch' }}
         env:
           FIREBASE_SERVICE_ACCOUNT_STAGING: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_STAGING }}
           FIREBASE_SERVICE_ACCOUNT_PROD: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_PROD }}
