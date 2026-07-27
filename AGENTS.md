@@ -43,6 +43,35 @@ irreversible infra choices, security/IAM grants, scope reversals). Getting
 this line right is worth more to the swarm's reliability than almost
 anything else in this repository.
 
+## Model Routing Matrix (CRITICAL RULE)
+
+To optimize code quality while minimizing token waste, subagents must be invoked with specific AI model tiers (`pro`, `flash`, `flash_lite`) based on their role:
+- **`pro` (High Reasoning):** MUST be used for the Architect, Developer, and Reviewer. These roles require deep systemic context and must never compromise on code quality.
+- **`flash` (Standard I/O):** MUST be used for Docs, SDET, and Retro. These roles process large amounts of context but execute straightforward tasks (writing English specs, writing tests from a plan, summarizing transcripts).
+- **`flash_lite` (Sub-Process Management):** MUST be used for polling, background watchers, log tailers, and environment checks. For example, when the Release Manager spawns a watcher to execute `gh run watch`, it must use `flash_lite`.
+
+**Lowest-Capable-Tier Default:**
+Before launching **any** subagent or subprocess, pick the **lowest tier that can do the job**, and escalate only when the task genuinely needs it.
+- **`pro` / High:** Only for multi-file systemic reasoning, novel logic, security judgement, or architecture.
+- **`flash` / Medium:** The default for "transform what I already have" (docs, tests, refactors).
+- **`flash_lite` / Low:** Anything that *observes or relays* rather than reasons (background watchers, pollers, one-shot lookups).
+
+**Cross-tool tier mapping:**
+Whichever tool is running, map the tier to its own model family when spawning:
+- **Antigravity (Gemini):** `pro` → Gemini 3.1 Pro, `flash` → Gemini 3.6 Flash, `flash_lite` → Gemini 3.6 Flash-Lite.
+- **Claude Code (Claude):** `pro` → Opus, `flash` → Sonnet, `flash_lite` → Haiku.
+
+**SDK Guidance (Gemini 3.6+):**
+When writing or modifying code that uses Gemini 3.6 Flash (or newer models), you MUST use the `GoogleGenerativeAI` (AI Studio) SDK or the `@genkit-ai/googleai` plugin. Do NOT use the `VertexAI` SDK or `@genkit-ai/vertexai`, as it will result in `404 Not Found` region availability errors for these newer models.
+
+## Subagent Naming Convention
+
+When invoking any subagent, you MUST format the `Role` parameter to visibly indicate its type and the specific model version/tier (High/Medium/Low) for the user's awareness.
+Format: `[Descriptive Role] ([Agent|Sub-Process] - [Model Version] ([Tier]))`
+- Example 1 (pro): `Release Manager (Agent - Gemini 3.1 Pro (High))`
+- Example 2 (flash): `Docs Writer (Agent - Gemini 3.6 Flash (Medium))`
+- Example 3 (flash_lite): `GH Run Watcher (Sub-Process - Gemini 3.6 Flash-Lite (Low))`
+
 ## Portability: tool names in `agent.json` are placeholders
 
 The system prompts reference tool names like `ask_question`,
