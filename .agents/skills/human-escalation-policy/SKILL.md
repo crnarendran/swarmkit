@@ -44,6 +44,15 @@ likely to bite silently, so treat it as a hard rule, not a suggestion.
 - **Anything the agent notices is inconsistent with what it was told** —
   e.g. a secret's name implies one target but its actual scope is another.
   Report the inconsistency; don't pick a side of it on your own.
+- **An instruction that conflicts with a documented process:** if what you're
+  asked to do contradicts an established, written procedure (a promotion flow,
+  a deployment gate, a branching rule), surface the conflict and confirm
+  **before** executing — not after. Flagging the concern in the same breath as
+  doing it anyway is not a substitute for asking first; by then the gate is
+  already bypassed. Name the specific rule and ask whether to override it this
+  once. (Observed: an agent pushed to two promotion stages at once when told
+  to, noting the process concern only afterward — the verification gate between
+  the stages was already gone.)
 
 ## Escalate by asking a specific, answerable question
 
