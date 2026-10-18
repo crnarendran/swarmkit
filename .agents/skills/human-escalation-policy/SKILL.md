@@ -54,6 +54,8 @@ likely to bite silently, so treat it as a hard rule, not a suggestion.
   to, noting the process concern only afterward — the verification gate between
   the stages was already gone.)
 
+The Dispatcher's "never" list (see `.agents/skills/dispatcher-workflow/SKILL.md`) defers to this policy.
+
 ## Escalate by asking a specific, answerable question
 
 A good escalation names the concrete options and their consequences ("use

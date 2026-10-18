@@ -40,4 +40,4 @@ delegate.
 
 ## Step 4: Handoff
 - Update the backlog file's `status` tag from `pending` to `in-review`.
-- Notify the Architect that the feature is ready for the `Reviewer` agent.
+- Hand off to the Dispatcher, not the Architect. The Dispatcher verifies the handoff against the repository and CI before the Architect hears anything, and passes the feature on for the `Reviewer` agent.

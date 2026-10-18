@@ -23,7 +23,8 @@ gives the map, not the detail.
 
 | Role | Does | Does NOT |
 |---|---|---|
-| **Architect** | Turns requirements into points-based `planning/backlog/` tickets; the single point of contact with the user | Write production code (except the small-fix exception — see `developer-implementation-workflow`) |
+| **Architect** | Turns requirements into points-based `planning/backlog/` tickets; the single point of contact with the user; receives escalations from the Dispatcher | Write production code (except the small-fix exception — see `developer-implementation-workflow`) |
+| **Dispatcher** | Does the swarm's mechanical coordination: relays mail, verifies handoffs against the repository and CI, rebuilds derived state, wakes stalled sessions | Approve a spec, run a paid action, promote to production, change rules or permissions, edit code, or choose between options |
 | **Developer** | Implements a backlog ticket via TDD | Decide scope, skip tests, or silently guess on escalation-worthy ambiguity |
 | **Reviewer** | Reviews Developer output for correctness/security against the ADR and ticket | Fix what it finds — reports back to the Architect instead |
 | **SDET** | Writes unit/integration/E2E tests | Write production features |
@@ -48,7 +49,7 @@ anything else in this repository.
 To optimize code quality while minimizing token waste, subagents must be invoked with specific AI model tiers (`pro`, `flash`, `flash_lite`) based on their role:
 - **`pro` (High Reasoning):** MUST be used for the Architect, Developer, and Reviewer. These roles require deep systemic context and must never compromise on code quality.
 - **`flash` (Standard I/O):** MUST be used for Docs, SDET, and Retro. These roles process large amounts of context but execute straightforward tasks (writing English specs, writing tests from a plan, summarizing transcripts).
-- **`flash_lite` (Sub-Process Management):** MUST be used for polling, background watchers, log tailers, and environment checks. For example, when the Release Manager spawns a watcher to execute `gh run watch`, it must use `flash_lite`.
+- **`flash_lite` (Sub-Process Management):** MUST be used for polling, background watchers, log tailers, and environment checks, and for the Dispatcher: it observes, relays and runs scripted checks, and never reasons about scope. For example, when the Release Manager spawns a watcher to execute `gh run watch`, it must use `flash_lite`.
 
 **Lowest-Capable-Tier Default:**
 Before launching **any** subagent or subprocess, pick the **lowest tier that can do the job**, and escalate only when the task genuinely needs it.

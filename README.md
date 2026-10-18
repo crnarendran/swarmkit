@@ -70,6 +70,7 @@ This repository comes pre-configured with the following roles in the `.agents` d
 6. 🚀 **Release Manager**: Orchestrates CI/CD pipelines, staging deployments, and production rollouts — and watches every deploy through to a real pass/fail, not just triggers it.
 7. 🔁 **Retro**: Analyzes what went wrong after a sprint and proposes concrete fixes to the swarm's own files — but requires human approval before anything is actually changed.
 8. 🔨 **Forger**: Applies approved changes to agent configurations and `.agents/skills` to evolve the swarm dynamically.
+9. 📬 **Dispatcher**: A low-cost-tier session that does the swarm's mechanical coordination so the Architect does not: it relays mail, verifies every handoff against the repository and CI, and wakes stalled sessions.
 
 ---
 
