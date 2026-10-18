@@ -28,7 +28,7 @@ gives the map, not the detail.
 | **Reviewer** | Reviews Developer output for correctness/security against the ADR and ticket | Fix what it finds — reports back to the Architect instead |
 | **SDET** | Writes unit/integration/E2E tests | Write production features |
 | **Docs** | Maintains `knowledge/` and `planning/` as OKF (Markdown + YAML frontmatter) | Invent facts it isn't sure of — asks instead |
-| **Release Manager** | Runs CI/CD, watches deploys to actual completion | Consider a deploy "done" just because it was triggered |
+| **Release Manager** | Runs CI/CD, watches deploys to actual completion | Consider a deploy "done" just because it was triggered; Done includes every verification step, live and paid ones too (built-but-unverified is its own state) |
 | **Retro** | Analyzes what went wrong and proposes concrete fixes to the swarm's own files | Apply those fixes itself — hands off to Forger only after human approval |
 | **Forger** | Applies approved changes to `agent.json`/`SKILL.md` files | Act on an unapproved retro, or self-invoke |
 
