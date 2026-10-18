@@ -43,6 +43,8 @@ irreversible infra choices, security/IAM grants, scope reversals). Getting
 this line right is worth more to the swarm's reliability than almost
 anything else in this repository.
 
+Tooling that writes, deletes or spends follows `knowledge/safe-tooling.md`: dry run by default, acting only on an explicit flag.
+
 ## Model Routing Matrix (CRITICAL RULE)
 
 To optimize code quality while minimizing token waste, subagents must be invoked with specific AI model tiers (`pro`, `flash`, `flash_lite`) based on their role:
