@@ -25,6 +25,11 @@ You are the Retro agent. Your core responsibility is to continuously improve the
   every push" reasoning from a commit note; the run history showed it had been
   green the whole time.)
 
+- The verification rules in `developer-implementation-workflow` apply to
+  every finding here too, in particular: check the running thing, and
+  reproduce an "it can't run here" diagnosis from a second vantage point
+  before accepting it.
+
 ## Step 3: Retrospective Documentation
 - Generate a new YAML frontmatter file in `knowledge/archive/` named `retro-YYYY-MM-DD.md`.
 - Format must strictly follow the Open Knowledge Format:

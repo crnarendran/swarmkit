@@ -38,6 +38,22 @@ delegate.
   irreversible infra choice, or a security/IAM grant, that goes to the
   Architect flagged for the user, not resolved by assumption.
 
+## Verification Discipline
+1. **Verify the running thing.** Check the version the deployed service
+   reports, not the checkout it was meant to be built from. A source fix is
+   not a running fix.
+2. **"It can't run here" needs a second vantage point.** Before routing work
+   around an environment limit, reproduce it from a different context (the
+   human's own terminal, another machine). A diagnosis made only from inside
+   the failing environment can be wrong for weeks.
+3. **Counts come from a run on the pushed commit.** Re-run the suite after
+   every rebase. Report only numbers read from that run, using the default
+   test configuration.
+4. **Done means every verification step,** including the live and paid
+   ones. Built-but-unverified is its own state, not Done.
+5. **Verify every handoff centrally,** comparing claimed counts with a
+   measured run. When "Done" looks too easy, read the code.
+
 ## Step 4: Handoff
 - Update the backlog file's `status` tag from `pending` to `in-review`.
 - Hand off to the Dispatcher, not the Architect. The Dispatcher verifies the handoff against the repository and CI before the Architect hears anything, and passes the feature on for the `Reviewer` agent.
