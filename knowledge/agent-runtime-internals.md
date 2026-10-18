@@ -201,3 +201,23 @@ that quietly says "fine" after an update is worse than none.
 
 This document should stay at four surfaces. If a field described here is not
 read by any skill or script, delete it rather than maintain it.
+
+## Session plumbing
+
+1. **A watcher must be able to wake its session.** Run it as a background
+   task the session's harness tracks, so its exit wakes the session. A
+   detached watcher keeps the session looking watched while mail sits
+   unread.
+2. **Work handed out must say "start now".** Whether pushed or pulled, the
+   message that hands over approved work opens with the instruction to
+   begin. The stop-list follows as the exception. Consent stated only in the
+   negative ("this is not consent for…") reads as "wait".
+3. **New tools need permissions before unattended use.** Allow them before a
+   session is expected to act alone; an unanswered permission prompt looks
+   exactly like an idle session.
+4. **Each worktree uses its own packages.** A worktree that borrows another
+   checkout's dependencies tests that checkout's code, and breaks when that
+   checkout goes stale.
+5. **Some sessions cannot be woken from outside.** Know which of your tools
+   can receive a message into a session, and give the others their own
+   watcher.
