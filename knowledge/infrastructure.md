@@ -59,6 +59,12 @@ just add a second hardcoded copy of the workflow.
 - Auth: none — the sync runs as a CI service account with Firestore write
   access, not an end-user identity
 
+## CI minutes budget
+
+**Budget CI minutes.** Bill once per guard workflow (one job), filter by
+path, cancel superseded runs of idempotent jobs, deploy only when content
+changed, avoid frequent cron, and push once per close-out.
+
 ## Secrets and credentials
 
 | Secret name | Credential store | Actually authenticates | Used by |

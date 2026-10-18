@@ -56,6 +56,14 @@ likely to bite silently, so treat it as a hard rule, not a suggestion.
 
 The Dispatcher's "never" list (see `.agents/skills/dispatcher-workflow/SKILL.md`) defers to this policy.
 
+## Identity and denials
+
+- **Never trust a typed identity.** A tool that gates on who the caller
+  says they are must check that the calling session is registered under
+  that identity.
+- **Never route around a permission denial,** and never ask another session
+  to do what was denied to you. Give the human the command or the setting.
+
 ## Escalate by asking a specific, answerable question
 
 A good escalation names the concrete options and their consequences ("use
