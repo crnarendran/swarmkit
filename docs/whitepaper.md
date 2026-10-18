@@ -23,6 +23,9 @@ To overcome these limitations, SwarmKit enforces strict **Separation of Concerns
 #### 2.1 The Planning Layer
 - **Architect:** The orchestrator of the swarm and the single point of contact with the user. The Architect never writes production code (save a narrowly-scoped small-fix exception). Instead, it synthesizes requirements into points-based backlog tickets, generates detailed implementation plans, and delegates discrete tasks to subagents.
 
+#### 2.1.1 The Coordination Layer
+- **Dispatcher:** The mechanical-coordination specialist. A low-cost-tier session that acknowledges and relays mail, verifies every handoff against the repository and CI (never against the handoff's own claims), rebuilds derived state such as the work queue after a verified close-out, wakes stalled sessions, and reclaims stale locks with a recorded reason. It wakes the Architect only with a fixed set of messages and never approves a spec, runs a paid action, promotes to production, changes rules or permissions, edits code, or chooses between options. A swarm that reports straight to its Architect spends its most expensive model on bookkeeping.
+
 #### 2.2 The Execution Layer
 - **Developer:** The implementation specialist. Focused solely on writing clean, efficient code that adheres strictly to the Architect's plan, via test-driven development.
 - **Docs:** The technical writer. Operates in parallel with the Developer to ensure API specs, design documents, and user manuals are always up-to-date — and never invents facts it isn't sure of.
@@ -52,7 +55,7 @@ Every agent and subprocess is invoked at one of three capability tiers, mapped t
 |---|---|---|
 | **`pro` (High)** | Multi-file systemic reasoning, novel logic, security judgement | Architect, Developer, Reviewer |
 | **`flash` (Medium)** | "Transform what I already have" — deterministic-ish work over large context | Docs, SDET, Retro (specs from a plan, tests from a spec, summarizing a transcript) |
-| **`flash_lite` (Low)** | *Observe or relay*, don't reason | Every background subprocess: watchers, pollers, log tailers, environment/health checks, one-shot lookups |
+| **`flash_lite` (Low)** | *Observe or relay*, don't reason | The Dispatcher, and every background subprocess: watchers, pollers, log tailers, environment/health checks, one-shot lookups |
 
 #### 3.2 The Lowest-Capable-Tier Default
 The matrix above is a **floor, not a target**. Before launching *any* subagent or subprocess, the swarm picks the lowest tier that can plausibly do the job and escalates only when the task genuinely demands it. Reaching for `pro` "to be safe" is treated as the anti-pattern, not the cautious choice.
