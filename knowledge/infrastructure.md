@@ -59,6 +59,25 @@ just add a second hardcoded copy of the workflow.
 - Auth: none — the sync runs as a CI service account with Firestore write
   access, not an end-user identity
 
+## Promotion and deploy safety
+
+1. **Production promotion is a pull request the human approves, one PR at
+   a time.** The Architect opens it with the staging run and what was
+   verified, and asks. Only after a yes for that PR may it merge. An
+   earlier yes never covers a later PR. No other role merges to
+   production. Keep the branch protected, with force-push and deletion
+   blocked for administrators too.
+2. **Data before code.** When code needs a data change (a new field, a
+   migrated record), make the data change first, or make the code read
+   both shapes. Know which pushes deploy automatically. A push to an
+   integration branch that also deploys a live backend ships the code
+   before anyone runs the migration.
+3. **Platforms retire runtime versions on a date.** Pin the runtime
+   deliberately, watch the provider's retirement schedule, and treat
+   "runtime decommissioned" as a deploy failure to fix, not to retry.
+4. **State what you changed apart from what you inferred.** Before
+   claiming a downstream effect, trace the whole path or observe it.
+
 ## CI minutes budget
 
 **Budget CI minutes.** Bill once per guard workflow (one job), filter by
