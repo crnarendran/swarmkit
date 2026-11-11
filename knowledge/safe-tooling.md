@@ -4,6 +4,23 @@ tags: [swarmkit, tooling, safety, dry-run, ci]
 ---
 # Safe-by-Default Tooling
 
+## Identity in a multi-person swarm
+
+Extends the untrusted-identity rule in
+[`human-escalation-policy`](../.agents/skills/human-escalation-policy/SKILL.md#identity-and-denials):
+
+1. **Identity comes only from records the platform's admin writes.** A
+   record that any session can create or overwrite, such as an agent's
+   self-registration, is not evidence of who a person is. Derive a person's
+   address and permissions from an admin-written person record.
+2. **Show actions only to the person they belong to.** A reply or
+   mark-as-read control appears only on messages addressed to the viewer.
+   Everyone else sees whom the message is for.
+3. **Sign-out clears everything per-person:** caches, live listeners and
+   drafts. The next person on the same browser must not see them.
+
+## Tooling rules
+
 1. **A tool that writes, deletes or spends acts only when asked.** The
    default is a dry run. Acting needs an explicit `--apply` or `--live`.
    `--help` never touches anything. A script that ran live because a flag
