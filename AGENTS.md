@@ -92,6 +92,27 @@ avoid `404 Not Found` region-availability errors. Record the equivalent gotcha
 for *your* stack where your project's code guidance lives — don't inherit this
 one blindly.
 
+## Coordination economy
+
+1. **Don't ask a session what a lookup can answer.** Every question to
+   another session costs it a model turn, and a long-lived session's turn
+   costs about ten times a fresh one's. Liveness, read receipts, lock
+   holders, CI results and story status all have a free answer: a roster,
+   a lock list, the CI history, the spec. A turn is for decisions.
+2. **Retire heavy sessions at a batch boundary.** Once a session's context
+   is near the ceiling, every cold wake rereads most of it. Close out its
+   batch, release its locks and write down what it knows. Then start a
+   successor from a short brief. Never retire mid-story, holding a lock,
+   or holding knowledge that is not written down.
+3. **One Architect per project.** When a swarm runs several projects, each
+   project's escalations go to its own Architect. Only the dispatcher
+   spans projects.
+4. **When the reporting tool is broken, report through the next channel,
+   and quote the exact error.** The ladder: the message tool; a note on
+   your lock; the commit message; the human's chat. A fallback carries the
+   report. It never does the broken tool's job by writing to that tool's
+   storage directly.
+
 ## Subagent Naming Convention
 
 When invoking any subagent, you MUST format the `Role` parameter to visibly indicate its type and the specific model version/tier (High/Medium/Low) for the user's awareness.
@@ -124,3 +145,17 @@ Nothing here persists in any single agent's private memory — the only
 thing every agent, tool, and session shares is what's written into this
 repo: `.agents/`, `knowledge/`, `planning/`. Treat writing to these as part
 of finishing a task, not an optional extra step.
+
+1. **Keep the protocol in one file, in one repository.** Every other repo
+   carries a *generated* copy between markers, and a drift check in CI fails
+   when a copy differs from its source. Nobody edits a generated copy:
+   change the source, then re-sync.
+2. **Know how much of a rules file each tool actually reads.** One tool
+   loaded only the first ~24 KB of its rules file, and another ignored
+   `@`-imports of files outside the repo. Rules past that point were never
+   seen. For a tool with a size limit, keep a condensed copy under the
+   limit. The condensed copy names the source revision it was written from,
+   and a check fails when the source changes after that revision.
+3. **A sync tool reads its source at the revision it runs from.** Run it
+   from an up-to-date checkout, not an installed copy that may be days
+   behind.

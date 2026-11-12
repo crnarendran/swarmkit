@@ -27,19 +27,19 @@ been recorded anywhere an agent could read it first. Don't repeat that.
 This repo doesn't have its own environments — it has no hosting or
 database of its own. It publishes its own docs (`README.md`, `AGENTS.md`,
 `docs/`, `knowledge/`, `.agents/skills/*/SKILL.md`) into a sibling
-project's (`sanjeev-ai`) shared docs-portal Firestore, tagged
+project's shared docs-portal Firestore, tagged
 `project: 'swarmkit'`.
 
 | Environment | Where it lives | Purpose |
 |---|---|---|
-| docs-portal staging | `docs-portal-staging` (Firebase project, owned by `sanjeev-ai`) | Live docs, `portal_docs` collection |
-| docs-portal prod | `docs-portal-prod` (Firebase project, owned by `sanjeev-ai`) | Live docs, `portal_docs` collection |
+| docs-portal staging | `<staging-project-id>` (Firebase project configured via `vars.DOCS_PORTAL_PROJECT_STAGING`) | Live docs, `portal_docs` collection |
+| docs-portal prod | `<prod-project-id>` (Firebase project configured via `vars.DOCS_PORTAL_PROJECT_PROD`) | Live docs, `portal_docs` collection |
 
 **There is no dev-preview environment for this repo, by design.**
 `sync-docs.yml` only triggers on push to `master` and always runs
 `syncDocs.ts --env=staging` — it never writes to `portal_docs_dev`. This
 is intentional, not a gap: this repo has one branch and its docs don't
-need a work-in-progress preview stage the way `sanjeev-ai`'s docs-portal
+need a work-in-progress preview stage the way a host portal's
 RBAC/admin screens did. Practical effect for anyone browsing the portal:
 selecting the **Dev** toggle while viewing project `swarmkit` shows the
 same content as **Staging**, because staging is the only collection this
@@ -52,12 +52,31 @@ just add a second hardcoded copy of the workflow.
 
 ### docs-portal (both staging and prod)
 - Hosting: none — this repo has no UI of its own, its docs render inside
-  the `sanjeev-ai` docs-portal app at `/swarmkit/...`
+  the shared docs-portal app at `/swarmkit/...`
 - Database: Firestore, `portal_docs` collection only (see above) — one
   document per synced file, ID `swarmkit_<slug-with-underscores>`
 - Backend/functions: none
 - Auth: none — the sync runs as a CI service account with Firestore write
   access, not an end-user identity
+
+## Promotion and deploy safety
+
+1. **Production promotion is a pull request the human approves, one PR at
+   a time.** The Architect opens it with the staging run and what was
+   verified, and asks. Only after a yes for that PR may it merge. An
+   earlier yes never covers a later PR. No other role merges to
+   production. Keep the branch protected, with force-push and deletion
+   blocked for administrators too.
+2. **Data before code.** When code needs a data change (a new field, a
+   migrated record), make the data change first, or make the code read
+   both shapes. Know which pushes deploy automatically. A push to an
+   integration branch that also deploys a live backend ships the code
+   before anyone runs the migration.
+3. **Platforms retire runtime versions on a date.** Pin the runtime
+   deliberately, watch the provider's retirement schedule, and treat
+   "runtime decommissioned" as a deploy failure to fix, not to retry.
+4. **State what you changed apart from what you inferred.** Before
+   claiming a downstream effect, trace the whole path or observe it.
 
 ## CI minutes budget
 
@@ -69,19 +88,19 @@ changed, avoid frequent cron, and push once per close-out.
 
 | Secret name | Credential store | Actually authenticates | Used by |
 |---|---|---|---|
-| `FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_STAGING` | GitHub repo secret | `docs-portal-staging` (a `sanjeev-ai`-owned Firebase project, not this repo's own) | `.github/workflows/sync-docs.yml` |
-| `FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_PROD` | GitHub repo secret | `docs-portal-prod` (a `sanjeev-ai`-owned Firebase project) | `.github/workflows/sync-docs.yml` (via `workflow_dispatch` with `target: prod`) |
+| `FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_STAGING` | GitHub repo secret | `<staging-project-id>` (configured via `vars.DOCS_PORTAL_PROJECT_STAGING`, owned by the host portal project) | `.github/workflows/sync-docs.yml` |
+| `FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_PROD` | GitHub repo secret | `<prod-project-id>` (configured via `vars.DOCS_PORTAL_PROJECT_PROD`, owned by the host portal project) | `.github/workflows/sync-docs.yml` (via `workflow_dispatch` with `target: prod`) |
 
-Both are literal copies of the same-named secrets in `sanjeev-ai`'s own
+Both are literal copies of the same-named secrets in the host portal's own
 repo — there's no cross-repo/org-level secret sharing set up (GitHub
 doesn't support that for personal-account repos without converting to an
-Organization), so if either credential is rotated on the `sanjeev-ai`
+Organization), so if either credential is rotated on the host portal
 side, it must be copied here again too. Confirmed present and working
 2026-07-25.
 
 ## Known gaps
 
 - No dev-preview stage — see "Environments" above. Deliberate, not a gap.
-- If `sanjeev-ai` ever converts to a GitHub Organization, revisit whether
+- If the host portal project ever converts to a GitHub Organization, revisit whether
   these two secrets can become a shared org-level secret instead of two
   independently-maintained copies.

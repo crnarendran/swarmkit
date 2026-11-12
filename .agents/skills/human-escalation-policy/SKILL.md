@@ -64,6 +64,15 @@ The Dispatcher's "never" list (see `.agents/skills/dispatcher-workflow/SKILL.md`
 - **Never route around a permission denial,** and never ask another session
   to do what was denied to you. Give the human the command or the setting.
 
+## Usage limits
+
+- **When a session hits its usage limit, it stops.** It never turns on
+  paid overage or a pay-as-you-go pool, and never retries into one.
+  Waiting for the reset is the default. Spending is the human's decision,
+  made each time, for a named piece of work. See
+  [`checking-agent-quota`](../checking-agent-quota/SKILL.md) for pause
+  publishing and watcher continuity rules.
+
 ## Escalate by asking a specific, answerable question
 
 A good escalation names the concrete options and their consequences ("use
@@ -80,3 +89,14 @@ can catch it if it was wrong, and continue. The whole point of this policy
 is to make escalation rare enough that it's still trustworthy when it
 happens — an agent that asks about everything is as unhelpful as one that
 asks about nothing.
+
+## Promotion and deploy safety
+
+- **Production promotion is a pull request the human approves, one PR at
+  a time.** The Architect opens it with the staging run and what was
+  verified, and asks. Only after a yes for that PR may it merge. An
+  earlier yes never covers a later PR. No other role merges to
+  production. Keep the branch protected, with force-push and deletion
+  blocked for administrators too. See
+  [`knowledge/infrastructure.md`](../../../knowledge/infrastructure.md) for
+  data-before-code, runtime pinning, and downstream-claim rules.
