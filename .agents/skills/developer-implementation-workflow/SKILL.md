@@ -19,6 +19,23 @@ that tax isn't worth paying. This is an efficiency exception, not a
 license to skip the Developer for anything non-trivial — when in doubt,
 delegate.
 
+## Pulling work from a queue
+
+1. **Only the Architect marks work ready.** It does so only when the spec
+   says why, its dependencies are done, its verification steps are
+   written, and any human decision it needs has been made.
+2. **A claim is a dispatch, and the lease is the lock.** A session that
+   claims a story starts it in the same turn, renews its lease at each
+   significant step, and releases it at close-out. "Nothing ready" is an
+   answer: the session goes idle with its watcher armed and does not look
+   for work elsewhere.
+3. **Pull needs a wake and permissions.** A session waiting only for mail
+   never notices ready work, so its watcher must wake it for ready work
+   too. Its claim tools must also be allowed before it runs unattended.
+   Otherwise its first claim waits on a prompt nobody sees.
+4. **Direct messages still win.** A session checks its mail before
+   claiming from the queue.
+
 ## Step 1: Context Consumption
 - You will be assigned a specific feature file from the `planning/backlog/` directory.
 - Parse the assigned backlog file.
@@ -57,3 +74,26 @@ delegate.
 ## Step 4: Handoff
 - Update the backlog file's `status` tag from `pending` to `in-review`.
 - Hand off to the Dispatcher, not the Architect. The Dispatcher verifies the handoff against the repository and CI before the Architect hears anything, and passes the feature on for the `Reviewer` agent.
+
+## Test-run and shell hazards
+
+1. **Read the exit code, not the counts.** "N passed" can sit beside a
+   non-zero exit. Don't pipe the run into something that hides its
+   status, and don't force it to exit.
+2. **A killed test run can hold its fixed ports.** A test that fails
+   locally and passes in CI may be meeting a previous run's orphan. Check
+   the ports before blaming the code.
+3. **Run tests in the CI's time zone** (usually UTC). Date logic that
+   passes in your local zone can fail there.
+4. **Random test data must not randomly hit an edge case.** A random hex id
+   that is occasionally all digits parses as a number one run in many.
+5. **An interrupted mutation run leaves its mutant in the source.** Diff
+   before committing after one.
+6. **The final run uses the real configuration,** with type checking on.
+   A scratch configuration that skips type checks hides type errors until
+   CI.
+7. **Never put shell metacharacters in an inline commit message or inline
+   script.** In a double-quoted shell string, backticks and `$(...)` run as
+   commands. One such script ran a stray `gh pr create`. Pass commit
+   messages through a quoted heredoc or a file, and edit files with an
+   editing tool rather than an inline script.

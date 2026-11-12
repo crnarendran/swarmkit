@@ -2,7 +2,7 @@
 
 > **A template repository for bootstrapping scalable agentic software development teams.**
 
-SwarmKit is an opinionated boilerplate for building multi-agent AI systems, inspired by the architecture used in `sanjeev-ai`. It provides the scaffolding necessary to set up a virtual software organization where specialized AI agents collaborate to plan, develop, test, and release software seamlessly. For a deeper dive into the architecture and theoretical framework, please read the [SwarmKit Whitepaper](docs/whitepaper.md).
+SwarmKit is an opinionated boilerplate for building multi-agent AI systems, inspired by patterns proven in real-world multi-agent development. It provides the scaffolding necessary to set up a virtual software organization where specialized AI agents collaborate to plan, develop, test, and release software seamlessly. For a deeper dive into the architecture and theoretical framework, please read the [SwarmKit Whitepaper](docs/whitepaper.md).
 
 ## Why SwarmKit?
 
@@ -28,7 +28,7 @@ SwarmKit agents are bound by strict system constraints to ensure autonomy and ve
 SwarmKit strictly separates dynamic planning state from static project knowledge to prevent "Context Saturation". Both use the **Open Knowledge Format (OKF)** (Markdown with YAML frontmatter tags).
 
 ```text
-c:/Naren/SwarmKit/
+<project-root>/
 ├── AGENTS.md                   # Entry point — read this first, any tool
 ├── CLAUDE.md                   # Imports AGENTS.md so Claude Code auto-loads it
 ├── .agents/                    
