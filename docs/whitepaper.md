@@ -2,7 +2,7 @@
 ## Bootstrapping Scalable Agentic Development Environments
 
 **Abstract**
-As large language models (LLMs) continue to evolve, the bottleneck in AI-driven software development is no longer the intelligence of the model itself, but rather the orchestration of its capabilities. Single-agent systems, while powerful for discrete tasks, degrade rapidly as project complexity, context limits, and scope increase. Inspired by the architecture used in `sanjeev-ai`, **SwarmKit** introduces a multi-agent framework designed to emulate a mature software engineering organization. By separating concerns into distinct, specialized roles (Architect, Developer, Reviewer, SDET, Docs, Release Manager, Retro, and Forger), and by routing each of those roles to the *cheapest model capable of doing its job*, SwarmKit provides a blueprint for scalable, high-quality, autonomous software development that stays economical at scale and portable across agent runtimes.
+As large language models (LLMs) continue to evolve, the bottleneck in AI-driven software development is no longer the intelligence of the model itself, but rather the orchestration of its capabilities. Single-agent systems, while powerful for discrete tasks, degrade rapidly as project complexity, context limits, and scope increase. Inspired by lessons from real-world multi-agent engineering, **SwarmKit** introduces a multi-agent framework designed to emulate a mature software engineering organization. By separating concerns into distinct, specialized roles (Architect, Developer, Reviewer, SDET, Docs, Release Manager, Retro, and Forger), and by routing each of those roles to the *cheapest model capable of doing its job*, SwarmKit provides a blueprint for scalable, high-quality, autonomous software development that stays economical at scale and portable across agent runtimes.
 
 ---
 
@@ -70,7 +70,7 @@ Because the default is deliberately aggressive about running cheap, SwarmKit pai
 
 ### 4. Portability Across Agent Runtimes
 
-SwarmKit is a *portable boilerplate*, not an implementation bound to one vendor or one IDE. `sanjeev-ai` itself is developed across two different agent runtimes (Google Antigravity and Claude Code) against the same repository, and the framework is designed so a third adopter can drop it onto an entirely different stack.
+SwarmKit is a *portable boilerplate*, not an implementation bound to one vendor or one IDE. Its own reference implementation is developed across two different agent runtimes (Google Antigravity and Claude Code) against the same repository, and the framework is designed so an adopter can drop it onto an entirely different stack.
 
 #### 4.1 Tool Names Are Capabilities, Not APIs
 The role prompts reference tools like `ask_question`, `invoke_subagent`, and a background-task primitive. These name **capabilities** — pause and ask the user; delegate a scoped subtask; run something in the background and get notified — not a specific product's API. An adopter maps each capability to whatever their runtime actually provides (a plan-mode approval gate, a subagent spawner, a task-plus-notification mechanism) rather than skipping a rule because the literal tool name is absent.
