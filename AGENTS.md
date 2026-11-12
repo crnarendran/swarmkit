@@ -14,6 +14,10 @@ Before starting any task, read (in this order):
 If `planning/backlog/` and `knowledge/` are otherwise empty, this is a
 fresh checkout of the template — there's no in-progress state to resume.
 
+## Public repository hygiene
+
+This repository is public; run `node scripts/privacy-check.mjs` before every push.
+
 ## The roles
 
 Each role has a config at `.agents/<role>/agent.json` (its system prompt)
