@@ -1,13 +1,13 @@
 /**
- * Syncs this repo's own documentation into the sanjeev-ai docs-portal's
+ * Syncs this repo's own documentation into a host docs-portal's
  * Firestore `portal_docs`/`portal_docs_dev` collection, tagged
  * `project: 'swarmkit'`, so it appears in the portal under /swarmkit/...
- * alongside sanjeev-ai's own docs — without the portal itself ever needing
+ * alongside the host's own docs — without the portal itself ever needing
  * to know this repo exists or being redeployed when these docs change.
  *
- * Run: npm run sync:docs -- --env=staging [--project-id=docs-portal-prod]
+ * Run: npm run sync:docs -- --env=staging --project-id=<firebase-project-id>
  * Requires GOOGLE_APPLICATION_CREDENTIALS pointing at a service account
- * with Firestore write access to the target docs-portal-* project.
+ * with Firestore write access to the target docs-portal project (or set DOCS_PORTAL_PROJECT_ID).
  */
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
@@ -85,7 +85,10 @@ const syncDocs = async () => {
   const collectionName = targetEnv === 'dev' ? 'portal_docs_dev' : 'portal_docs';
 
   const projectIdArg = process.argv.find(arg => arg.startsWith('--project-id='));
-  const firebaseProjectId = projectIdArg ? projectIdArg.split('=')[1] : 'docs-portal-staging';
+  const firebaseProjectId = (projectIdArg ? projectIdArg.split('=')[1] : process.env.DOCS_PORTAL_PROJECT_ID || '').trim();
+  if (!firebaseProjectId) {
+    throw new Error('Missing target Firebase project ID: pass --project-id=<id> or set DOCS_PORTAL_PROJECT_ID.');
+  }
 
   initializeApp({ projectId: firebaseProjectId });
   const db = getFirestore();
