@@ -145,3 +145,17 @@ Nothing here persists in any single agent's private memory — the only
 thing every agent, tool, and session shares is what's written into this
 repo: `.agents/`, `knowledge/`, `planning/`. Treat writing to these as part
 of finishing a task, not an optional extra step.
+
+1. **Keep the protocol in one file, in one repository.** Every other repo
+   carries a *generated* copy between markers, and a drift check in CI fails
+   when a copy differs from its source. Nobody edits a generated copy:
+   change the source, then re-sync.
+2. **Know how much of a rules file each tool actually reads.** One tool
+   loaded only the first ~24 KB of its rules file, and another ignored
+   `@`-imports of files outside the repo. Rules past that point were never
+   seen. For a tool with a size limit, keep a condensed copy under the
+   limit. The condensed copy names the source revision it was written from,
+   and a check fails when the source changes after that revision.
+3. **A sync tool reads its source at the revision it runs from.** Run it
+   from an up-to-date checkout, not an installed copy that may be days
+   behind.

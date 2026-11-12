@@ -22,6 +22,23 @@ go to the Architect, and the
 **Route handoffs to the Dispatcher, not the Architect.** A swarm that
 reports to its Architect spends its most expensive model on bookkeeping.
 
+## Pulling work from a queue
+
+1. **Only the Architect marks work ready.** It does so only when the spec
+   says why, its dependencies are done, its verification steps are
+   written, and any human decision it needs has been made.
+2. **A claim is a dispatch, and the lease is the lock.** A session that
+   claims a story starts it in the same turn, renews its lease at each
+   significant step, and releases it at close-out. "Nothing ready" is an
+   answer: the session goes idle with its watcher armed and does not look
+   for work elsewhere.
+3. **Pull needs a wake and permissions.** A session waiting only for mail
+   never notices ready work, so its watcher must wake it for ready work
+   too. Its claim tools must also be allowed before it runs unattended.
+   Otherwise its first claim waits on a prompt nobody sees.
+4. **Direct messages still win.** A session checks its mail before
+   claiming from the queue.
+
 ## Two failure modes seen in practice
 
 - A Dispatcher must work only from a checkout it has verified is current.
