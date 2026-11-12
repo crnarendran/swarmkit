@@ -202,6 +202,17 @@ that quietly says "fine" after an update is worse than none.
 This document should stay at four surfaces. If a field described here is not
 read by any skill or script, delete it rather than maintain it.
 
+## Rules file loading limits
+
+See also `AGENTS.md` (*Knowledge, not memory*):
+
+- **Know how much of a rules file each tool actually reads.** One tool
+  loaded only the first ~24 KB of its rules file, and another ignored
+  `@`-imports of files outside the repo. Rules past that point were never
+  seen. For a tool with a size limit, keep a condensed copy under the
+  limit. The condensed copy names the source revision it was written from,
+  and a check fails when the source changes after that revision.
+
 ## Session plumbing
 
 1. **A watcher must be able to wake its session.** Run it as a background
