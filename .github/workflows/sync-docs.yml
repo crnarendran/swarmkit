@@ -1,20 +1,21 @@
 name: Sync Docs to Portal
 
 # Pushes this repo's own docs (README, AGENTS.md, docs/, knowledge/,
-# .agents/skills/*/SKILL.md) into the sanjeev-ai docs-portal's Firestore,
+# .agents/skills/*/SKILL.md) into a host docs-portal's Firestore,
 # tagged project:'swarmkit', so they render at /swarmkit/... there without
 # the portal itself needing to redeploy.
 #
-# Requires a repo secret holding a Firebase service account JSON key with
-# Firestore write access to the target docs-portal-staging/prod project.
-# See knowledge/infrastructure.md for how to provision one — this workflow
-# does not create it for you. Until the secret exists the job SKIPS (see the
-# `if:` guard below) rather than failing red on every push.
+# Requires:
+# - Repo variables DOCS_PORTAL_PROJECT_STAGING (and DOCS_PORTAL_PROJECT_PROD for prod)
+# - Repo secrets FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_STAGING (and _PROD for prod)
+#   holding a Firebase service account JSON key with Firestore write access.
+# See knowledge/infrastructure.md for setup details. Until both the project
+# variable and matching secret exist, the workflow SKIPS cleanly rather than
+# failing red on every push.
 #
-# PORTABILITY: this pipeline targets the sanjeev-ai docs-portal specifically
-# (the project this template was extracted from). If you cloned SwarmKit for
-# your own project, either delete this workflow or repoint it at your own
-# docs surface — it is not part of the portable swarm rulebook.
+# PORTABILITY: this pipeline targets an external docs-portal setup. If you
+# cloned SwarmKit for your own project, either delete this workflow or repoint
+# it at your own docs surface — it is not part of the portable swarm rulebook.
 
 on:
   push:
@@ -31,7 +32,7 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'Which docs-portal project to sync to'
+        description: 'Which docs-portal target to sync to'
         required: true
         default: 'staging'
         type: choice
@@ -41,35 +42,53 @@ on:
 
 jobs:
   sync-docs:
+    if: ${{ (github.event.inputs.target == 'prod' && vars.DOCS_PORTAL_PROJECT_PROD != '') || (github.event.inputs.target != 'prod' && vars.DOCS_PORTAL_PROJECT_STAGING != '') }}
     runs-on: ubuntu-latest
-    # `secrets` is not available in a job-level `if:`, so surface presence as a
-    # job-level env var (which CAN read secrets) and gate the steps on it. Until
-    # the secret is provisioned the steps skip and the job stays green, rather
-    # than failing red on every push. A manual run always proceeds.
+    # `secrets` is not available in a job-level `if:`, so surface readiness via
+    # job-level env and gate the steps on it. Until both the target variable and
+    # service account secret are provisioned, the steps skip cleanly.
     env:
-      HAS_STAGING_SECRET: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_STAGING != '' }}
+      TARGET: ${{ github.event.inputs.target || 'staging' }}
+      PROJECT_STAGING: ${{ vars.DOCS_PORTAL_PROJECT_STAGING }}
+      PROJECT_PROD: ${{ vars.DOCS_PORTAL_PROJECT_PROD }}
+      HAS_STAGING_CONFIG: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_STAGING != '' && vars.DOCS_PORTAL_PROJECT_STAGING != '' }}
+      HAS_PROD_CONFIG: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_PROD != '' && vars.DOCS_PORTAL_PROJECT_PROD != '' }}
     steps:
-      - if: ${{ env.HAS_STAGING_SECRET == 'true' || github.event_name == 'workflow_dispatch' }}
+      - name: Check target configuration
+        id: config
+        run: |
+          if [ "$TARGET" = "prod" ]; then
+            echo "ready=$HAS_PROD_CONFIG" >> "$GITHUB_OUTPUT"
+            if [ "$HAS_PROD_CONFIG" != "true" ]; then
+              echo "Skipping docs sync: DOCS_PORTAL_PROJECT_PROD or FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_PROD is not set."
+            fi
+          else
+            echo "ready=$HAS_STAGING_CONFIG" >> "$GITHUB_OUTPUT"
+            if [ "$HAS_STAGING_CONFIG" != "true" ]; then
+              echo "Skipping docs sync: DOCS_PORTAL_PROJECT_STAGING or FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_STAGING is not set."
+            fi
+          fi
+      - if: ${{ steps.config.outputs.ready == 'true' }}
         uses: actions/checkout@v4
-      - if: ${{ env.HAS_STAGING_SECRET == 'true' || github.event_name == 'workflow_dispatch' }}
+      - if: ${{ steps.config.outputs.ready == 'true' }}
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - if: ${{ env.HAS_STAGING_SECRET == 'true' || github.event_name == 'workflow_dispatch' }}
-        run: npm install
+          node-version: '24'
+      - if: ${{ steps.config.outputs.ready == 'true' }}
+        run: npm ci
       - name: Sync docs
-        if: ${{ env.HAS_STAGING_SECRET == 'true' || github.event_name == 'workflow_dispatch' }}
+        if: ${{ steps.config.outputs.ready == 'true' }}
         env:
           FIREBASE_SERVICE_ACCOUNT_STAGING: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_STAGING }}
           FIREBASE_SERVICE_ACCOUNT_PROD: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOCS_PORTAL_PROD }}
         run: |
-          TARGET="${{ github.event.inputs.target || 'staging' }}"
+          trap 'rm -f /tmp/sa.json' EXIT
           if [ "$TARGET" = "prod" ]; then
-            echo "$FIREBASE_SERVICE_ACCOUNT_PROD" > /tmp/sa.json
-            PROJECT_ID="docs-portal-prod"
+            printf '%s' "$FIREBASE_SERVICE_ACCOUNT_PROD" > /tmp/sa.json
+            PROJECT_ID="$PROJECT_PROD"
           else
-            echo "$FIREBASE_SERVICE_ACCOUNT_STAGING" > /tmp/sa.json
-            PROJECT_ID="docs-portal-staging"
+            printf '%s' "$FIREBASE_SERVICE_ACCOUNT_STAGING" > /tmp/sa.json
+            PROJECT_ID="$PROJECT_STAGING"
           fi
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json
-          npm run sync:docs -- --env=staging --project-id=$PROJECT_ID
+          npm run sync:docs -- --env=staging --project-id="$PROJECT_ID"
