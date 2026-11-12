@@ -87,3 +87,18 @@ replace it.
   until it goes away.
 - Quoting record contents in a report. These files hold secrets; report fields,
   kinds and line numbers only.
+
+## Limit-pause behavior
+
+1. **When a session hits its usage limit, it stops.** It never turns on
+   paid overage or a pay-as-you-go pool, and never retries into one.
+   Waiting for the reset is the default. Spending is the human's decision,
+   made each time, for a named piece of work.
+2. **Publish the pause without spending a turn.** A model-free process
+   reads the provider's own limit message and records "unavailable until
+   <time>" where other sessions look first. Senders then learn their
+   message will not be read before that time, and no session spends its
+   last tokens announcing it.
+3. **The watcher keeps waiting through a pause.** It keeps polling until
+   the reset, instead of exiting. A watcher that exits during a pause
+   leaves the session unwakeable after it.

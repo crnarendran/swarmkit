@@ -64,6 +64,15 @@ The Dispatcher's "never" list (see `.agents/skills/dispatcher-workflow/SKILL.md`
 - **Never route around a permission denial,** and never ask another session
   to do what was denied to you. Give the human the command or the setting.
 
+## Usage limits
+
+- **When a session hits its usage limit, it stops.** It never turns on
+  paid overage or a pay-as-you-go pool, and never retries into one.
+  Waiting for the reset is the default. Spending is the human's decision,
+  made each time, for a named piece of work. See
+  [`checking-agent-quota`](../checking-agent-quota/SKILL.md) for pause
+  publishing and watcher continuity rules.
+
 ## Escalate by asking a specific, answerable question
 
 A good escalation names the concrete options and their consequences ("use
