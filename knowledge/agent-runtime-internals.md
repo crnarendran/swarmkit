@@ -17,9 +17,9 @@ tags: [swarmkit, agent-runtime, claude-code, antigravity, quota, forensics]
 | Claude Code | 2.1.246 to 2.1.255 | Record shapes were identical across all of them. A strict shape check also held across 20 Claude Code versions on one host, with no false alarms. |
 | Antigravity | build not recorded | Conversation databases checked: 488 on one host, all with the same schema. The build number was not captured. Record it when you re-verify. |
 
-Shapes below are as asserted by the ARK-4 format guard (`format-guard.js` and
-its `quota-parsers.js` / `claude-usage.js` callers) in the swarm ops runtime
-repo, at commit `3d962e6`. If that guard changes, this document is stale.
+Shapes below are as asserted by the runtime format guard (`format-guard.js` and
+its `quota-parsers.js` / `claude-usage.js` callers) in the swarm's shared runtime
+checkout. If that guard changes, this document is stale.
 Sample records are synthetic: every id, path and number is a placeholder.
 
 ## Scope: four surfaces, nothing else

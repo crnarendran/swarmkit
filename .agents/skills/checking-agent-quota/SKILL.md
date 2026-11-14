@@ -34,8 +34,8 @@ demand or from a plain, model-free watcher.
 
 | Tool | Use | Do not use |
 |---|---|---|
-| **Claude Code** | Its session transcripts: they carry an exact, absolute reset time and name which limit was hit. Mechanics: the `claude-quota.mjs` script in the swarm ops runtime. | Guessing from a screenshot of a settings panel. |
-| **Antigravity** | Its per-session conversation database, named by the session id. Mechanics: the `quota-status.mjs` script in the swarm ops runtime, which also reads the older log. | The shared log file as the primary source: it has no session attribution and is overwritten on every restart. |
+| **Claude Code** | Its session transcripts: they carry an exact, absolute reset time and name which limit was hit. Mechanics: the `claude-quota.mjs` script in the swarm's shared runtime checkout. | Guessing from a screenshot of a settings panel. |
+| **Antigravity** | Its per-session conversation database, named by the session id. Mechanics: the `quota-status.mjs` script in the swarm's shared runtime checkout, which also reads the older log. | The shared log file as the primary source: it has no session attribution and is overwritten on every restart. |
 
 For either tool, the vendor's own usage panel is the **only** account-wide
 number. Transcripts and databases refine it for one machine; they cannot
